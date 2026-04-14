@@ -1,3 +1,4 @@
+/*
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
@@ -43,7 +44,7 @@ int main()
     gpio_set_dir(PIN_CS, GPIO_OUT);
     gpio_put(PIN_CS, 1);  
     // For more examples of SPI use see https://github.com/raspberrypi/pico-examples/tree/master/spi
-*/
+
     // PIO Blinking example
     PIO pio = pio0;
     uint offset = pio_add_program(pio, &blink_program);
@@ -59,5 +60,60 @@ int main()
     while (true) {
         printf("Hello, world!\n");
         sleep_ms(1000);
+    }
+}
+*/
+
+#include <stdio.h>
+#include <string.h>
+#include "pico/stdlib.h"
+#include "hm01b0.h"
+
+// Frame size — 96x96 fits comfortably in the Pico's 264KB SRAM
+#define FRAME_WIDTH  96
+#define FRAME_HEIGHT 96
+
+// 2-byte magic header so the viewer can sync to frame boundaries
+#define FRAME_MAGIC_0 0xAA
+#define FRAME_MAGIC_1 0x55
+
+static uint8_t frame[FRAME_WIDTH * FRAME_HEIGHT];
+
+static hm01b0_config_t cam = {
+    .i2c           = i2c0,
+    .sda_pin       = 6,
+    .scl_pin       = 7,
+    .vsync_pin     = 5,
+    .hsync_pin     = 4,
+    .pclk_pin      = 3,
+    .data_pin_base = 2,
+    .pio           = pio0,
+    .pio_sm        = 0,
+    .dma_channel   = 0,
+    .width         = FRAME_WIDTH,
+    .height        = FRAME_HEIGHT,
+};
+
+int main(void) {
+    stdio_init_all();
+
+    // Wait for USB serial to connect before starting the stream
+    while (!stdio_usb_connected()) {
+        sleep_ms(100);
+    }
+    sleep_ms(500);  // Let the host viewer settle
+
+    hm01b0_init(&cam);
+
+    while (true) {
+        hm01b0_read_frame(&cam, frame, sizeof(frame));
+
+        // Send magic header so the viewer knows a frame is starting
+        putchar(FRAME_MAGIC_0);
+        putchar(FRAME_MAGIC_1);
+
+        // Send raw greyscale bytes (one byte per pixel, 0–255)
+        fwrite(frame, 1, sizeof(frame), stdout);
+        fflush(stdout);
     }
 }
