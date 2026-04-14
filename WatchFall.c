@@ -69,6 +69,8 @@ int main()
 #include "pico/stdlib.h"
 #include "hm01b0.h"
 
+//hi
+
 // Frame size — 96x96 fits comfortably in the Pico's 264KB SRAM
 #define FRAME_WIDTH  96
 #define FRAME_HEIGHT 96
