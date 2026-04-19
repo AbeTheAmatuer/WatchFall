@@ -38,7 +38,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(WatchFall WatchFall.c )
+add_executable(WatchFall WatchFall.c hm01b0.c)
 
 pico_set_program_name(WatchFall "WatchFall")
 pico_set_program_version(WatchFall "0.1")
@@ -48,22 +48,21 @@ pico_generate_pio_header(WatchFall ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(WatchFall 0)
-pico_enable_stdio_usb(WatchFall 0)
+pico_enable_stdio_usb(WatchFall 1)
 
 # Add the standard library to the build
 target_link_libraries(WatchFall
-        pico_stdlib)
+        pico_stdlib
+        hardware_i2c
+        hardware_gpio
+        hardware_pio
+        hardware_spi
+)
 
 # Add the standard include files to the build
 target_include_directories(WatchFall PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
 )
-
-# Add any user requested libraries
-target_link_libraries(WatchFall 
-        hardware_spi
-        hardware_pio
-        )
 
 pico_add_extra_outputs(WatchFall)
 

@@ -79,6 +79,8 @@ int main()
 #define FRAME_MAGIC_0 0xAA
 #define FRAME_MAGIC_1 0x55
 
+// The Pico streams raw 96x96 grayscale frames over USB CDC.
+// Use a host viewer like watchfall_viewer.py to display the live camera feed.
 static uint8_t frame[FRAME_WIDTH * FRAME_HEIGHT];
 
 static hm01b0_config_t cam = {
